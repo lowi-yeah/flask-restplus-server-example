@@ -6,9 +6,9 @@ RESTful API Assets
 """
 
 from flask_restplus._http import HTTPStatus
-from webargs.flaskparser import use_kwargs
 
 from app.extensions.api import abort
+from app.extensions.api.parameters import PaginationParameters
 from app.extensions import blockchain
 from app.extensions.api import Namespace
 from app.extensions.blockchain.schemas import TransactionSchema
@@ -51,7 +51,7 @@ class Assets(Resource):
 
         # precondition
         # make sure there is no asset with the same id
-        existing_asset = blockchain.retrieve_asset(asset.id)
+        existing_asset = blockchain.get_asset(asset.id)
         if not (existing_asset is None):
             abort(code=HTTPStatus.CONFLICT,
                   message=f'Assets with id \'{asset.id}\' already exists')
@@ -83,7 +83,7 @@ class AssetByID(Resource):
         # validate the asset_id manually, since I don't know how to make marshmallow aware of the
         # url/path parameter. using the @api.parameters decorator creates a query parameter, which is not what we want
 
-        asset = blockchain.retrieve_asset(asset_id)
+        asset = blockchain.get_asset(asset_id)
         if asset is None:
             abort(code=HTTPStatus.NOT_FOUND, message=f'Asset not found: {asset_id}')
 
@@ -98,23 +98,19 @@ class AssetByID(Resource):
         # tx = bigchain.updateMetadata(asset)
         return asset
 
-#
-# @api.route('/<int:team_id>/transactions/')
-# @api.response(
-#     code=HTTPStatus.NOT_FOUND,
-#     description="asset not found.",
-# )
-# @api.resolve_object_by_model(Asset, 'asset')
-# class AssetTransactions(Resource):
-#     """
-#     Manipulations of transactions of a specific asset
-#     """
-#
-#     @api.parameters(PaginationParameters())
-#     @api.response(AssetSchema(many=True))
-#     def get(self, args, asset):
-#         """
-#         Get transactions by asset ID.
-#         """
-#         transactions = "get_asset_transactions(asset=asset, offset=args['offset'], limit=args['limit'])"
-#         return transactions
+
+@api.route('/<string:asset_id>/transactions/')
+@api.response(code=HTTPStatus.NOT_FOUND,
+              description="asset not found.")
+class AssetTransactions(Resource):
+    """
+    Transactions of a given asset
+    """
+
+    @api.parameters(PaginationParameters())
+    @api.response(TransactionSchema(many=True))
+    def get(self, args, asset_id):
+        """
+        Get transactions of an asset with the id 'asset_id'.
+        """
+        return blockchain.get_asset_transactions(asset_id=asset_id, offset=args['offset'], limit=args['limit'])

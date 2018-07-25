@@ -61,19 +61,22 @@ class Blockchain(object):
         tx = self.bigchain.transactions.send(fulfilled_token_tx)
         return Transaction(tx)
 
-    def retrieve_asset(self, asset_id):
+    # todo: implement the offset and limit parameters
+    def get_asset_transactions(self, asset_id, offset=0, limit=100):
         asset_search_results = self.bigchain.assets.get(search=asset_id)
         if len(asset_search_results) is 0:
             return None
-
         search_result = asset_search_results[0]
-        transactions = self.bigchain.transactions.get(asset_id=search_result['id'])
-        transaction = next(iter(transactions), None)
+        return self.bigchain.transactions.get(asset_id=search_result['id'])
 
+    def get_asset(self, asset_id):
+        transactions = self.get_asset_transactions(asset_id)
+        transaction = next(iter(transactions), None)
         if transaction is None:
             return None
-
         return Asset(transaction['asset']['data']['id'], transaction['metadata']['hash_digest'])
 
     def retrieve_transaction(self, tx_id):
         return self.bigchain.transactions.retrieve(txid=tx_id)
+
+
