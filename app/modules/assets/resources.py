@@ -6,6 +6,7 @@ RESTful API Assets
 """
 
 from flask_restplus._http import HTTPStatus
+from webargs.flaskparser import use_kwargs
 
 from app.extensions.api import abort
 from app.extensions import blockchain
@@ -15,8 +16,11 @@ from flask_restplus_patched import Resource
 from . import parameters
 from .models import Asset
 from .schemas import AssetSchema
+from app.extensions.cryptography.schemas import Ed25519KeySchema
 
-api = Namespace('asset', description="Assets")  # pylint: disable=invalid-name
+api = Namespace('asset',
+                description="Assets",
+                validate=True)
 
 
 @api.route('/')
@@ -36,7 +40,7 @@ class Assets(Resource):
     #     """
 
     @api.parameters(parameters.CreateAssetParameters())
-    @api.response(TransactionSchema())
+    @api.response(TransactionSchema(strict=True), code=HTTPStatus.CREATED)
     @api.response(code=HTTPStatus.CONFLICT)
     @api.response(code=HTTPStatus.BAD_REQUEST)
     def post(self, args):
@@ -53,7 +57,7 @@ class Assets(Resource):
                   message=f'Assets with id \'{asset.id}\' already exists')
 
         try:
-            return blockchain.create_asset(asset)
+            return blockchain.create_asset(asset), HTTPStatus.CREATED
         except Exception as e:
             abort(code=HTTPStatus.BAD_REQUEST,
                   message=f'Unknown error: {e}')
@@ -65,7 +69,9 @@ class AssetByID(Resource):
     Manipulations with a specific asset.
     """
 
-    @api.response(AssetSchema())
+    # @api.parameters(parameters.GetAssetParameters())
+    @api.response(AssetSchema(strict=True),
+                  code=HTTPStatus.OK)
     @api.response(
         code=HTTPStatus.NOT_FOUND,
         description='Asset not found.')
@@ -73,23 +79,17 @@ class AssetByID(Resource):
         """
         Get asset details by ID.
         """
-        # public_key_schema = Pub()
-        # result = pu.dump(blob)
+
+        # validate the asset_id manually, since I don't know how to make marshmallow aware of the
+        # url/path parameter. using the @api.parameters decorator creates a query parameter, which is not what we want
 
         asset = blockchain.retrieve_asset(asset_id)
         if asset is None:
             abort(code=HTTPStatus.NOT_FOUND, message=f'Asset not found: {asset_id}')
 
-        asset_schema = AssetSchema()
-        dumped = asset_schema.dump(asset)
+        return asset, HTTPStatus.OK
 
-        print('dumped', dumped)
-
-        return asset
-
-        # @api.parameters(parameters.PatchAssetMetadataParameters())
-
-    @api.response(AssetSchema())
+    @api.response(AssetSchema(), code=HTTPStatus.OK)
     @api.response(code=HTTPStatus.CONFLICT)
     def patch(self, args, asset):
         """

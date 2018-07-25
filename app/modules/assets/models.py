@@ -1,9 +1,9 @@
 # encoding: utf-8
-
 """
 Asset data model
 --------------------
 """
+from marshmallow import validates
 
 
 class Asset(object):
@@ -12,4 +12,5 @@ class Asset(object):
         self.metadata = metadata_digest
 
     def __repr__(self):
-        return '<Asset(asset_id={self.id!r}, metadata_digest={self.metadata!r})>'.format(self=self)
+        return '<Asset(id={self.id!r}, digest={self.metadata!r})>'.format(self=self)
+

@@ -7,13 +7,12 @@ Input arguments (Parameters) for Asset resources RESTful API
 from flask_marshmallow import base_fields as fields
 from flask_restplus_patched import Parameters, PatchJSONParameters
 from marshmallow import validates
-from app.extensions.cryptography.fields import PublicKey
 
 from app.extensions.cryptography.validate import validate_public_key, validate_hash_digest
 
 
 class CreateAssetParameters(Parameters):
-    asset_id = PublicKey(description="A public key representing the asset")
+    asset_id = fields.String(description="A public key representing the asset")
     metadata_digest = fields.String(description="sha3/256 digest of the metadata")
 
     @validates('asset_id')
@@ -33,6 +32,19 @@ class CreateAssetParameters(Parameters):
         :raises: ValidationError
         """
         validate_hash_digest(metadata)
+
+
+class GetAssetParameters(Parameters):
+    asset_id = fields.String(description="A public key representing the asset")
+
+    @validates('asset_id')
+    def validate_id(self, asset_id):
+        """
+        Validate the format of the asset id. must be a public key
+        :param str asset_id: the id to be validated
+        :raises: ValidationError
+        """
+        validate_public_key(asset_id)
 
 
 class PatchAssetMetadataParameters(PatchJSONParameters):
