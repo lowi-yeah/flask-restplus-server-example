@@ -5,14 +5,13 @@ Application related tasks for Invoke.
 
 from invoke import Collection
 
-from . import dependencies, env, db, run, users, swagger, boilerplates
+from . import dependencies, env, run, users, swagger, boilerplates
 
 from config import BaseConfig
 
 namespace = Collection(
     dependencies,
     env,
-    db,
     run,
     users,
     swagger,

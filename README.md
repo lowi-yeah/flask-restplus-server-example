@@ -242,12 +242,12 @@ Modules initialization calls `init_app()` in every enabled module
 (listed in `config.ENABLED_MODULES`).
 
 Let's take `teams` module as an example to look further.
-[`app/modules/teams/__init__.py:init_app()`](app/modules/teams/__init__.py)
+[`app/modules/teams/__init__.py:init_app()`](app/modules/assets/__init__.py)
 imports and registers `api` instance of (patched) `flask_restplus.Namespace`
 from `.resources`. Flask-RESTPlus `Namespace` is designed to provide similar
 functionality as Flask `Blueprint`.
 
-[`api.route()`](app/modules/teams/resources.py) is used to bind a
+[`api.route()`](app/modules/assets/resources.py) is used to bind a
 resource (classes inherited from `flask_restplus.Resource`) to a specific
 route.
 

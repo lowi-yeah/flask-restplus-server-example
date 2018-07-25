@@ -24,8 +24,7 @@ def run(
         host='127.0.0.1',
         port=5000,
         flask_config=None,
-        install_dependencies=True,
-        upgrade_db=True,
+        install_dependencies=False,
         uwsgi=False,
         uwsgi_mode='http',
         uwsgi_extra_options='',
@@ -41,22 +40,6 @@ def run(
 
     from app import create_app
     app = create_app()
-
-    if upgrade_db:
-        # After the installed dependencies the app.db.* tasks might need to be
-        # reloaded to import all necessary dependencies.
-        from . import db as db_tasks
-        reload(db_tasks)
-
-        context.invoke_execute(context, 'app.db.upgrade', app=app)
-        if app.debug:
-            context.invoke_execute(
-                context,
-                'app.db.init_development_data',
-                app=app,
-                upgrade_db=False,
-                skip_on_failure=True
-            )
 
     use_reloader = app.debug
     if uwsgi:

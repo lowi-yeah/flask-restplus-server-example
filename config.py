@@ -7,23 +7,6 @@ class BaseConfig(object):
 
     PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
 
-    # POSTGRESQL
-    # DB_USER = 'user'
-    # DB_PASSWORD = 'password'
-    # DB_NAME = 'restplusdb'
-    # DB_HOST = 'localhost'
-    # DB_PORT = 5432
-    # SQLALCHEMY_DATABASE_URI = 'postgresql://{user}:{password}@{host}:{port}/{name}'.format(
-    #     user=DB_USER,
-    #     password=DB_PASSWORD,
-    #     host=DB_HOST,
-    #     port=DB_PORT,
-    #     name=DB_NAME,
-    # )
-
-    # SQLITE
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///%s' % (os.path.join(PROJECT_ROOT, "example.db"))
-
     DEBUG = False
     ERROR_404_HELP = False
 
@@ -31,26 +14,22 @@ class BaseConfig(object):
 
     AUTHORIZATIONS = {
         'oauth2_password': {
-            'type': 'oauth2',
-            'flow': 'password',
-            'scopes': {},
+            'type':     'oauth2',
+            'flow':     'password',
+            'scopes':   {},
             'tokenUrl': '/auth/oauth2/token',
         },
         # TODO: implement other grant types for third-party apps
-        #'oauth2_implicit': {
+        # 'oauth2_implicit': {
         #    'type': 'oauth2',
         #    'flow': 'implicit',
         #    'scopes': {},
         #    'authorizationUrl': '/auth/oauth2/authorize',
-        #},
+        # },
     }
 
     ENABLED_MODULES = (
-        'auth',
-
-        'users',
-        'teams',
-
+        'assets',
         'api',
     )
 
@@ -62,13 +41,15 @@ class BaseConfig(object):
     SWAGGER_UI_OAUTH_APP_NAME = "Flask-RESTplus Example server documentation"
 
     # TODO: consider if these are relevant for this project
-    SQLALCHEMY_TRACK_MODIFICATIONS = True
     CSRF_ENABLED = True
+
+    BIGCHAINDB__URL = 'localhost:9984'
+    # BIGCHAINDB__URL = 'http://ec2-18-195-153-114.eu-central-1.compute.amazonaws.com:9984'
+    PREDEFINED_KEYS_FILE = os.path.join(PROJECT_ROOT, 'keys/rddl_keys.json')
 
 
 class ProductionConfig(BaseConfig):
     SECRET_KEY = os.getenv('EXAMPLE_API_SERVER_SECRET_KEY')
-    SQLALCHEMY_DATABASE_URI = os.getenv('EXAMPLE_API_SERVER_SQLALCHEMY_DATABASE_URI')
 
 
 class DevelopmentConfig(BaseConfig):
@@ -77,6 +58,3 @@ class DevelopmentConfig(BaseConfig):
 
 class TestingConfig(BaseConfig):
     TESTING = True
-
-    # Use in-memory SQLite database for testing
-    SQLALCHEMY_DATABASE_URI = 'sqlite://'

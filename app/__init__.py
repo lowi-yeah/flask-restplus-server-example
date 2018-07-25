@@ -9,13 +9,13 @@ import sys
 from flask import Flask
 from werkzeug.contrib.fixers import ProxyFix
 
-
 CONFIG_NAME_MAPPER = {
     'development': 'config.DevelopmentConfig',
-    'testing': 'config.TestingConfig',
-    'production': 'config.ProductionConfig',
-    'local': 'local_config.LocalConfig',
+    'testing':     'config.TestingConfig',
+    'production':  'config.ProductionConfig',
+    'local':       'local_config.LocalConfig',
 }
+
 
 def create_app(flask_config_name=None, **kwargs):
     """
@@ -24,7 +24,7 @@ def create_app(flask_config_name=None, **kwargs):
     # This is a workaround for Alpine Linux (musl libc) quirk:
     # https://github.com/docker-library/python/issues/211
     import threading
-    threading.stack_size(2*1024*1024)
+    threading.stack_size(2 * 1024 * 1024)
 
     app = Flask(__name__, **kwargs)
 
