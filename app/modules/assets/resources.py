@@ -6,9 +6,10 @@ RESTful API Assets
 """
 
 from flask_restplus._http import HTTPStatus
+
+from app.extensions.api import abort
 from app.extensions import blockchain
 from app.extensions.api import Namespace
-from app.extensions.api.parameters import PaginationParameters
 from app.extensions.blockchain.schemas import TransactionSchema
 from flask_restplus_patched import Resource
 from . import parameters
@@ -24,29 +25,38 @@ class Assets(Resource):
     Manipulations of assets.
     """
 
-    @api.parameters(PaginationParameters())
-    @api.response(AssetSchema(many=True))
-    def get(self, _args):
-        """
-        List of assets.
-
-        Returns a list of assets starting from ``offset`` limited by ``limit``
-        parameter.
-        """
-        hash_digest = '6df43c5cc25b1630b8aafee95f038dc9fedd7b096c82bf7b3f05d552772b6558'
-        asset = Asset(asset_id="Monty", metadata_hash_digest=hash_digest)
-        return [asset]
+    # since we do not offer general querying for assets, this get on the root ns '/' is disabled
+    # @api.response(AssetSchema(many=True))
+    # def get(self, _args):
+    #     """
+    #     List of assets.
+    #     ---------------
+    #     Returns a list of assets starting from ``offset`` limited by ``limit``
+    #     parameter.
+    #     """
 
     @api.parameters(parameters.CreateAssetParameters())
     @api.response(TransactionSchema())
     @api.response(code=HTTPStatus.CONFLICT)
+    @api.response(code=HTTPStatus.BAD_REQUEST)
     def post(self, args):
         """
         Create a new asset.
         """
         asset = Asset(**args)
-        tx = blockchain.create_asset(asset)
-        return tx
+
+        # precondition
+        # make sure there is no asset with the same id
+        existing_asset = blockchain.retrieve_asset(asset.id)
+        if not (existing_asset is None):
+            abort(code=HTTPStatus.CONFLICT,
+                  message=f'Assets with id \'{asset.id}\' already exists')
+
+        try:
+            return blockchain.create_asset(asset)
+        except Exception as e:
+            abort(code=HTTPStatus.BAD_REQUEST,
+                  message=f'Unknown error: {e}')
 
 
 @api.route('/<string:asset_id>')
