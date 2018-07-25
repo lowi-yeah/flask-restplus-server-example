@@ -60,22 +60,35 @@ class Assets(Resource):
 
 
 @api.route('/<string:asset_id>')
-@api.response(
-    code=HTTPStatus.NOT_FOUND,
-    description="Asset not found.")
 class AssetByID(Resource):
     """
     Manipulations with a specific asset.
     """
 
     @api.response(AssetSchema())
+    @api.response(
+        code=HTTPStatus.NOT_FOUND,
+        description='Asset not found.')
     def get(self, asset_id):
         """
         Get asset details by ID.
         """
-        return blockchain.retrieve_asset(asset_id)
+        # public_key_schema = Pub()
+        # result = pu.dump(blob)
 
-    # @api.parameters(parameters.PatchAssetMetadataParameters())
+        asset = blockchain.retrieve_asset(asset_id)
+        if asset is None:
+            abort(code=HTTPStatus.NOT_FOUND, message=f'Asset not found: {asset_id}')
+
+        asset_schema = AssetSchema()
+        dumped = asset_schema.dump(asset)
+
+        print('dumped', dumped)
+
+        return asset
+
+        # @api.parameters(parameters.PatchAssetMetadataParameters())
+
     @api.response(AssetSchema())
     @api.response(code=HTTPStatus.CONFLICT)
     def patch(self, args, asset):
@@ -84,15 +97,6 @@ class AssetByID(Resource):
         """
         # tx = bigchain.updateMetadata(asset)
         return asset
-
-    @api.response(code=HTTPStatus.CONFLICT)
-    @api.response(code=HTTPStatus.NO_CONTENT)
-    def delete(self, asset):
-        """
-        Delete an asset by ID.
-        """
-        # obacht: we're working with blockchains here. this implies that assets cannot be deleted
-        return None
 
 #
 # @api.route('/<int:team_id>/transactions/')

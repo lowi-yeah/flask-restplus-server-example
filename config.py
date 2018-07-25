@@ -47,6 +47,9 @@ class BaseConfig(object):
     # BIGCHAINDB__URL = 'http://ec2-18-195-153-114.eu-central-1.compute.amazonaws.com:9984'
     PREDEFINED_KEYS_FILE = os.path.join(PROJECT_ROOT, 'keys/rddl_keys.json')
 
+    PUBLIC_KEY_LENGTH = 44
+    SHA3_256_DIGEST_LENGTH = 64
+
 
 class ProductionConfig(BaseConfig):
     SECRET_KEY = os.getenv('EXAMPLE_API_SERVER_SECRET_KEY')

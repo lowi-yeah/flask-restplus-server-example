@@ -5,10 +5,12 @@ Blockchain extension
 """
 
 from bigchaindb_driver import BigchainDB
+from bigchaindb_driver.crypto import generate_keypair
+
+
 from config import BaseConfig
 from app.extensions.cryptography.keys import get_keypair
 from app.extensions.blockchain.models import Transaction
-
 from app.modules.assets.models import Asset
 
 
@@ -19,6 +21,10 @@ class Blockchain(object):
 
     def __init__(self, app=None):
         self.bigchain = BigchainDB(BaseConfig.BIGCHAINDB__URL)
+
+        keypair = generate_keypair()
+        print('keypair', keypair)
+
         self.logger = None
         if app:
             self.init_app(app)
